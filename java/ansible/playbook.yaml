@@ -1,0 +1,69 @@
+---
+- name: Install Java
+  hosts: java_server
+  tasks:
+  - name: apt update and upgrade
+    become: true
+    apt:
+      upgrade: yes
+      update_cache: yes
+      cache_valid_time: 86400 #One day
+  - name: install jre, jdk and acl
+    become: true
+    apt:
+      pkg:
+        - default-jre
+        - default-jdk
+        - acl
+
+- name: create user
+  hosts: java_server
+  tasks:
+    - name: create group
+      become: true
+      group:
+        name: "{{username}}"
+    - name: create user
+      become: true
+      user:
+        name: "{{username}}"
+        group: "{{username}}"
+
+- name:  build locally and copy to server
+  hosts: java_server
+  tasks:
+    - name: build locally
+      local_action: 
+        module: command
+        chdir: ~/Learning/ansible-practice/java 
+        cmd: ./gradlew build
+    - name: copy to server
+      become: true
+      copy:
+        src: ~/Learning/ansible-practice/java/build/libs/bootcamp-java-project-1.0-SNAPSHOT.jar
+        dest: /home/{{username}}/app.jar
+    - name: change ownership
+      become: true
+      file:
+        path: /home/{{username}}/app.jar
+        owner: "{{username}}"
+        group: "{{username}}"
+
+- name: run app
+  hosts: java_server
+  tasks:
+    - name: check if prev app is running
+      shell: ps aux | grep "[j]ava -jar" | awk '{print $2}'
+      register: running_processes
+    - name: kill prev run app
+      become: true
+      command:
+        cmd: kill {{running_processes.stdout}}
+      when: running_processes.stdout != ""
+    - name: run new app
+      become: true
+      become_user: "{{username}}"
+      command:
+        cmd: java -jar /home/{{username}}/app.jar param1 param2
+      async: 1000
+      poll: 0
