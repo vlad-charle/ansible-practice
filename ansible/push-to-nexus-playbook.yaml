@@ -1,0 +1,8 @@
+---
+- name:  push artifact to local Nexus server
+  hosts: local
+  tasks:
+    - name: push
+      command:
+        chdir: ~/Learning/ansible-practice
+        cmd: curl -v -u {{username}}:{{password}} -X POST 'http://localhost:8081/service/rest/v1/components?repository=maven-project-repo' -F maven2.groupId=projectID -F maven2.artifactId=javaApp -F maven2.version={{appVersion}} -F maven2.asset1=@build/libs/bootcamp-java-project-1.0-SNAPSHOT.jar -F maven2.asset1.extension=jar

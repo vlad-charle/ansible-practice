@@ -35,12 +35,12 @@
     - name: build locally
       local_action: 
         module: command
-        chdir: ~/Learning/ansible-practice/java 
+        chdir: ~/Learning/ansible-practice
         cmd: ./gradlew build
     - name: copy to server
       become: true
       copy:
-        src: ~/Learning/ansible-practice/java/build/libs/bootcamp-java-project-1.0-SNAPSHOT.jar
+        src: ~/Learning/ansible-practice/build/libs/bootcamp-java-project-1.0-SNAPSHOT.jar
         dest: /home/{{username}}/app.jar
     - name: change ownership
       become: true
