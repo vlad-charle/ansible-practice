@@ -3,6 +3,7 @@
 
 Ansible:
 * It's assumed, that you will clone this repo in ~/Learning dir and Nexus will be run on localhost.
+* To quickly spin-up EC2, please, use terraform and paste output EC2 IP into ansible/hosts file to build & deploy app.
 * In build-deploy-playbook you need to provide username var on a command line, i.e. `ansible-playbook -i hosts playbook.yaml -e "username=dev"`
 * To get Nexus up and running use `docker run -d -p 8081:8081 --name nexus -v nexus-data:/nexus-data sonatype/nexus3`
 * To get Nexus admin password do:
