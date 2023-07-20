@@ -1,6 +1,7 @@
 ---
 - name: Wait for connection
   hosts: all
+  gather_facts: false
   tasks:
     - name: Make sure VM is available
       ansible.builtin.wait_for_connection:
@@ -20,44 +21,11 @@
   hosts: all
   become: true
   tasks:
-  - name: Add Jenkins repo
-    get_url:
-      url: https://pkg.jenkins.io/redhat-stable/jenkins.repo
-      dest: /etc/yum.repos.d/jenkins.repo
-  - name: Import a key file from Jenkins-CI to enable installation from the package
-    rpm_key:
-      state: present
-      key: https://pkg.jenkins.io/redhat-stable/jenkins.io-2023.key
-  - name: Upgrade all packages
-    yum:
-      name: '*'
-      state: latest
-  - name: Install the latest version of Java
-    dnf:
-      name: java-11-amazon-corretto
-      state: latest
-  - name: create jenkins user
-    user:
-      name: jenkins
-  - name: Install a list of packages
-    yum:
-      name:
-        - nodejs
-        - docker
-        - jenkins
-      state: present
-      update_cache: true
-  - name: add Jenkins user to Docker group
-    user:
-      name: jenkins
-      groups: 
-        - docker
-      append: true
-  - name: Make sure a Docker is running
-    systemd:
-      state: started
-      name: docker
-  - name: Make sure a Jenkins is running
-    systemd:
-      state: started
-      name: jenkins
+    - name: Amazon Linux tasks
+      include_tasks:
+        file: tasks_amazon_linux.yaml
+      when: ansible_facts.distribution == "Amazon"
+    - name: Ubuntu tasks
+      include_tasks:
+        file: tasks_ubuntu.yaml
+      when: ansible_facts.distribution == "Ubuntu"
