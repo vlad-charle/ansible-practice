@@ -29,3 +29,32 @@
       include_tasks:
         file: tasks_ubuntu.yaml
       when: ansible_facts.distribution == "Ubuntu"
+    - name: add Jenkins user to Docker group
+      user:
+        name: jenkins
+        groups: 
+          - docker
+        append: true
+      when: not run_container
+    - name: make sure Docker is running
+      systemd:
+        state: started
+        name: docker
+    - name: make sure Jenkins is running
+      when: not run_container
+      systemd:
+        state: started
+        name: jenkins
+    - name: make sure Jenkins container is running
+      when: run_container
+      docker_container:
+        name: jenkins
+        ports:
+        - "8080:8080"
+        - "50000:50000"
+        detach: true
+        volumes:
+        - /var/run/docker.sock:/var/run/docker.sock
+        - /usr/local/bin/docker:/usr/bin/docker
+        - jenkins_home:/var/jenkins_home
+        image: jenkins/jenkins:lts

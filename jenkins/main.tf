@@ -3,6 +3,12 @@ provider "aws" {}
 # IP var should be provided via tf CLI command execution, i.e. terraform plan -var 'my_ip=192.158.1.38/32'
 variable "my_ip" {}
 
+variable "run_container" {
+  description = "Boolean to run Jenkins as container, instead of installation on a VM"
+  type = bool
+  default = false
+}
+
 data "aws_vpc" "get_vpc" {
   default = true
 }
@@ -121,7 +127,7 @@ resource "null_resource" "run_ansible_amazon_linux" {
 
   provisioner "local-exec" {
     working_dir = "ansible"
-    command = length(aws_instance.amazon_linux_server) != 0 ? "ansible-playbook --inventory ${join(",", aws_instance.amazon_linux_server[*].public_ip)}, --user ec2-user install_run_jenkins.yaml" : "echo 'There is no Amazon Linux servers'"
+    command = length(aws_instance.amazon_linux_server) != 0 ? "ansible-playbook --inventory ${join(",", aws_instance.amazon_linux_server[*].public_ip)}, --user ec2-user ${var.run_container ? "-e \"run_container=true\"" : ""} install_run_jenkins.yaml" : "echo 'There is no Amazon Linux servers'"
   }
 }
 
@@ -132,7 +138,7 @@ resource "null_resource" "run_ansible_ubuntu" {
 
   provisioner "local-exec" {
     working_dir = "ansible"
-    command = length(aws_instance.ubuntu_server) != 0 ? "ansible-playbook --inventory ${join(",", aws_instance.ubuntu_server[*].public_ip)}, --user ubuntu install_run_jenkins.yaml" : "echo 'There is no Ubuntu servers'"
+    command = length(aws_instance.ubuntu_server) != 0 ? "ansible-playbook --inventory ${join(",", aws_instance.ubuntu_server[*].public_ip)}, --user ubuntu ${var.run_container ? "-e \"run_container=true\"" : ""} install_run_jenkins.yaml" : "echo 'There is no Ubuntu servers'"
   }
 }
 

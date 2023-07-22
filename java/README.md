@@ -1,5 +1,5 @@
 #### This project is for the Devops bootcamp exercise for 
-#### "Build Tools and Package Managers" 
+#### "Ansible exercises 1 and 2" 
 
 Ansible:
 * It's assumed, that you will clone this repo in ~/Learning dir and Nexus will be run on localhost.

@@ -1,36 +1,28 @@
 ---
+- name: install Docker
+  apt:
+    name: docker.io
+    update_cache: yes
 - name: install Java and Docker
   apt:
-    name: 
-    - docker.io
-    - openjdk-17-jre
-    update_cache: yes
+    name: openjdk-17-jre
+  when: not run_container
 - name: add Jenkins apt repository key
   apt_key:
     url: https://pkg.jenkins.io/debian/jenkins.io-2023.key
     keyring: /usr/share/keyrings/jenkins-keyring.gpg
+  when: not run_container
 - name: add Jenkins apt repository
   apt_repository:
     repo: deb [signed-by=/usr/share/keyrings/jenkins-keyring.gpg] https://pkg.jenkins.io/debian binary/
     state: present
+  when: not run_container
 - name: create jenkins user
   user:
     name: jenkins
+  when: not run_container
 - name: install Jenkins
   apt:
     name: jenkins
     update_cache: yes
-- name: add Jenkins user to Docker group
-  user:
-    name: jenkins
-    groups: 
-      - docker
-    append: true
-- name: make sure a Docker is running
-  systemd:
-    state: started
-    name: docker
-- name: make sure a Jenkins is running
-  systemd:
-    state: started
-    name: jenkins
+  when: not run_container
