@@ -129,7 +129,7 @@ resource "aws_security_group" "java_app_sg" {
 }
 
 resource "aws_instance" "java_app_server" {
-  count                       = 0
+  count                       = 1
   ami                         = data.aws_ami.amazon_linux.id
   instance_type               = "t2.micro"
   associate_public_ip_address = true
@@ -179,11 +179,10 @@ resource "aws_instance" "ansible_node_server" {
 
   user_data = <<-EOF
   #/bin/bash
-  python3 -m ensurepip --default-pip
-  python3 -m pip install --upgrade pip setuptools wheel
-  python3 -m pip install boto3
-  python3 -m pip install botocore
-  python3 -m pip install --user ansible
+  sudo -H -u ec2-user python3 -m ensurepip --default-pip --user
+  sudo -H -u ec2-user python3 -m pip install --upgrade pip setuptools wheel boto3 botocore ansible --user
+  yum update && yum install git
+  git clone https://github.com/vlad-charle/ansible-practice.git
   EOF
 
   tags = {
@@ -226,7 +225,7 @@ resource "aws_security_group" "db_sg" {
 }
 
 resource "aws_instance" "db_server" {
-  count                       = 0
+  count                       = 1
   ami                         = data.aws_ami.amazon_linux.id
   instance_type               = "t2.micro"
   associate_public_ip_address = true

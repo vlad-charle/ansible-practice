@@ -46,7 +46,8 @@
   become: true
   tasks:
     - name: Clean-up prev build
-      command:
+      local_action: 
+        module: command
         cmd: rm -rf /home/ec2-user/*
     - name: Checkout java-app repo
       git:
