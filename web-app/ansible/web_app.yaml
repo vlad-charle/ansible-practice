@@ -21,9 +21,13 @@
   hosts: tag_Role_db_server
   become: true
   tasks:
+    - name: Install the MySQL repository
+      yum:
+        name: https://dev.mysql.com/get/mysql80-community-release-el7-5.noarch.rpm
+        state: present
     - name: Install MySQL
       yum:
-        name: mysql-server
+        name: mysql-community-server
         state: present
         update_cache: yes
     - name: Start MySQL service
@@ -40,6 +44,10 @@
         password: '{{db_password}}'
         priv: 'java-app-db.*:ALL'
         state: present
+    - name: Grab DB server IP
+      debug:
+        msg: "{{ ansible_ssh_host }}"
+      register: db_server_ip
 
 - name: Install java-app
   hosts: tag_Role_web_app_server
@@ -69,6 +77,30 @@
       command:
         cmd: kill {{running_processes.stdout}}
       when: running_processes.stdout != ""
+    - name: Set DB_USER environment variable for ec2-user
+      lineinfile:
+        path: /home/ec2-user/.bashrc
+        regexp: '^export DB_USER='
+        line: 'export DB_USER={{db_user}}'
+        state: present
+    - name: Set DB_PWD environment variable for ec2-user
+      lineinfile:
+        path: /home/ec2-user/.bashrc
+        regexp: '^export DB_PWD='
+        line: 'export DB_PWD={{db_password}}'
+        state: present
+    - name: Set DB_NAME environment variable for ec2-user
+      lineinfile:
+        path: /home/ec2-user/.bashrc
+        regexp: '^export DB_NAME='
+        line: 'export DB_NAME=java-app-db'
+        state: present
+    - name: Set DB_SERVER environment variable for ec2-user
+      lineinfile:
+        path: /home/ec2-user/.bashrc
+        regexp: '^export DB_SERVER='
+        line: 'export DB_SERVER={{db_server_ip}}'
+        state: present
     - name: Run new app
       command:
         cmd: java -jar /home/ec2-user/java-app.jar

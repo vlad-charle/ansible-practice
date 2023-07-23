@@ -34,7 +34,7 @@ resource "aws_internet_gateway" "igw" {
 }
 
 resource "aws_eip" "nat_ip" {
-  domain     = "vpc"
+  domain = "vpc"
   depends_on = [
     aws_internet_gateway.igw
   ]
@@ -107,11 +107,11 @@ resource "aws_security_group" "java_app_sg" {
   }
 
   ingress {
-    description = "SSH"
-    from_port   = 22
-    to_port     = 22
-    protocol    = "tcp"
-    cidr_blocks = [var.my_ip]
+    description     = "SSH"
+    from_port       = 22
+    to_port         = 22
+    protocol        = "tcp"
+    cidr_blocks     = [var.my_ip]
     security_groups = [aws_security_group.ansible_node_sg.id]
   }
 
@@ -177,13 +177,14 @@ resource "aws_instance" "ansible_node_server" {
   subnet_id                   = aws_subnet.public_subnet.id
   vpc_security_group_ids      = [aws_security_group.ansible_node_sg.id]
 
-  user_data = <<-EOF
-  #/bin/bash
-  sudo -H -u ec2-user python3 -m ensurepip --default-pip --user
-  sudo -H -u ec2-user python3 -m pip install --upgrade pip setuptools wheel boto3 botocore ansible --user
-  yum update && yum install git
-  git clone https://github.com/vlad-charle/ansible-practice.git
-  EOF
+  user_data = <<EOF
+#!/bin/bash
+#install python modules for specific user
+sudo -H -u ec2-user python3 -m ensurepip --default-pip --user
+sudo -H -u ec2-user python3 -m pip install --upgrade pip setuptools wheel boto3 botocore ansible --user
+yum update && yum install git -y
+git clone https://github.com/vlad-charle/ansible-practice.git
+EOF
 
   tags = {
     Role = "ansible_controle_node_server"
@@ -204,10 +205,10 @@ resource "aws_security_group" "db_sg" {
   }
 
   ingress {
-    description = "SSH"
-    from_port   = 22
-    to_port     = 22
-    protocol    = "tcp"
+    description     = "SSH"
+    from_port       = 22
+    to_port         = 22
+    protocol        = "tcp"
     security_groups = [aws_security_group.ansible_node_sg.id]
   }
 
