@@ -129,7 +129,7 @@ resource "aws_security_group" "java_app_sg" {
 }
 
 resource "aws_instance" "java_app_server" {
-  count                       = 1
+  count                       = 0
   ami                         = data.aws_ami.amazon_linux.id
   instance_type               = "t2.micro"
   associate_public_ip_address = true
@@ -177,7 +177,8 @@ resource "aws_instance" "ansible_node_server" {
   subnet_id                   = aws_subnet.public_subnet.id
   vpc_security_group_ids      = [aws_security_group.ansible_node_sg.id]
 
-  user_data = <<EOF
+  user_data = <<-EOF
+  #/bin/bash
   python3 -m ensurepip --default-pip
   python3 -m pip install --upgrade pip setuptools wheel
   python3 -m pip install boto3
