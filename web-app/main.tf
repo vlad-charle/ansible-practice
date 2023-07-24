@@ -43,7 +43,7 @@ resource "aws_eip" "nat_ip" {
 resource "aws_nat_gateway" "nat" {
   allocation_id     = aws_eip.nat_ip.allocation_id
   connectivity_type = "public"
-  subnet_id         = aws_subnet.private_subnet.id
+  subnet_id         = aws_subnet.public_subnet.id
 }
 
 resource "aws_route_table" "public_route_table" {
@@ -139,6 +139,7 @@ resource "aws_instance" "java_app_server" {
 
   tags = {
     Role = "web_app_server"
+    Name = "app"
   }
 }
 
@@ -179,15 +180,24 @@ resource "aws_instance" "ansible_node_server" {
 
   user_data = <<EOF
 #!/bin/bash
+
 #install python modules for specific user
 sudo -H -u ec2-user python3 -m ensurepip --default-pip --user
 sudo -H -u ec2-user python3 -m pip install --upgrade pip setuptools wheel boto3 botocore ansible --user
+
+#install git and clone repo with Ansible code
 yum update && yum install git -y
-git clone https://github.com/vlad-charle/ansible-practice.git
+cd /home/ec2-user && git clone https://github.com/vlad-charle/ansible-practice.git
+chown -R ec2-user:ec2-user /home/ec2-user/ansible-practice
+
+#create file for AWS creds
+mkdir .aws && touch /home/ec2-user/.aws/credentials
+chown -R ec2-user:ec2-user /home/ec2-user/.aws/credentials
 EOF
 
   tags = {
     Role = "ansible_controle_node_server"
+    Name = "ansible"
   }
 }
 
@@ -236,6 +246,7 @@ resource "aws_instance" "db_server" {
 
   tags = {
     Role = "db_server"
+    Name = "DB"
   }
 }
 
