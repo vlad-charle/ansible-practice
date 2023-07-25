@@ -181,18 +181,12 @@ resource "aws_instance" "ansible_node_server" {
   user_data = <<EOF
 #!/bin/bash
 
-#install python modules for specific user
-sudo -H -u ec2-user python3 -m ensurepip --default-pip --user
-sudo -H -u ec2-user python3 -m pip install --upgrade pip setuptools wheel boto3 botocore ansible --user
-
-#install git and clone repo with Ansible code
-yum update && yum install git -y
-cd /home/ec2-user && git clone https://github.com/vlad-charle/ansible-practice.git
-chown -R ec2-user:ec2-user /home/ec2-user/ansible-practice
+apt update && apt install ansible
+git clone https://github.com/vlad-charle/ansible-practice.git
 
 #create file for AWS creds
-mkdir .aws && touch /home/ec2-user/.aws/credentials
-chown -R ec2-user:ec2-user /home/ec2-user/.aws/credentials
+mkdir .aws && touch /home/ubuntu/.aws/credentials
+chown -R ubuntu:ubuntu /home/ubuntu/.aws/credentials
 EOF
 
   tags = {

@@ -20,18 +20,26 @@
 - name: Install and configure MySQL server
   hosts: tag_Role_db_server
   become: true
-  tasks:
-    - name: Update apt cache
-      apt:
-        update_cache: yes
+  tasks:  
     - name: Install MySQL server
       apt:
-        name: mysql-server
+        name: 
+          - mysql-server
+          - python3-pymysql
         state: present
+        update_cache: yes
     - name: Start MySQL service
       service:
         name: mysql
         state: started
+    - name: Create /root/.my.cnf file with root credentials
+      copy:
+        content: |
+          [client]
+          user=root
+          password={{ mysql_root_password }}
+        dest: /root/.my.cnf
+        mode: 0600
     - name: Create DB 
       mysql_db:
         name: java-app-db
@@ -54,20 +62,20 @@
     - name: Clean-up prev build
       local_action: 
         module: command
-        cmd: rm -rf /home/ec2-user/*
+        cmd: rm -rf /home/ubuntu/*
     - name: Checkout java-app repo
       git:
         repo: 'https://github.com/vlad-charle/ansible-practice.git'
-        dest: /home/ec2-user/
+        dest: /home/ubuntu/
     - name: Build locally
       local_action: 
         module: command
-        chdir: /home/ec2-user/ansible-practice/web-app
+        chdir: /home/ubuntu/ansible-practice/web-app
         cmd: ./gradlew build
     - name: Copy to server
       copy:
-        src: /home/ec2-user/ansible-practice/web-app/build/libs/bootcamp-java-mysql-project-1.0-SNAPSHOT.jar
-        dest: /home/ec2-user/java-app.jar
+        src: /home/ubuntu/ansible-practice/web-app/build/libs/bootcamp-java-mysql-project-1.0-SNAPSHOT.jar
+        dest: /home/ubuntu/java-app.jar
     - name: Check if prev app is running
       shell: ps aux | grep "[j]ava -jar" | awk '{print $2}'
       register: running_processes
@@ -77,30 +85,30 @@
       when: running_processes.stdout != ""
     - name: Set DB_USER environment variable for ec2-user
       lineinfile:
-        path: /home/ec2-user/.bashrc
+        path: /home/ubuntu/.bashrc
         regexp: '^export DB_USER='
         line: 'export DB_USER={{db_user}}'
         state: present
     - name: Set DB_PWD environment variable for ec2-user
       lineinfile:
-        path: /home/ec2-user/.bashrc
+        path: /home/ubuntu/.bashrc
         regexp: '^export DB_PWD='
         line: 'export DB_PWD={{db_password}}'
         state: present
     - name: Set DB_NAME environment variable for ec2-user
       lineinfile:
-        path: /home/ec2-user/.bashrc
+        path: /home/ubuntu/.bashrc
         regexp: '^export DB_NAME='
         line: 'export DB_NAME=java-app-db'
         state: present
     - name: Set DB_SERVER environment variable for ec2-user
       lineinfile:
-        path: /home/ec2-user/.bashrc
+        path: /home/ubuntu/.bashrc
         regexp: '^export DB_SERVER='
         line: 'export DB_SERVER={{db_server_ip}}'
         state: present
     - name: Run new app
       command:
-        cmd: java -jar /home/ec2-user/java-app.jar
+        cmd: java -jar /home/ubuntu/java-app.jar
       async: 1000
       poll: 0
