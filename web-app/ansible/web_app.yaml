@@ -25,30 +25,26 @@
       apt:
         name: 
           - mysql-server
-          - python3-pymysql
+          - mysql-client 
+          - python3-mysqldb
+          - libmysqlclient-dev
         state: present
         update_cache: yes
     - name: Start MySQL service
       service:
         name: mysql
         state: started
-    - name: Create /root/.my.cnf file with root credentials
-      copy:
-        content: |
-          [client]
-          user=root
-          password={{ mysql_root_password }}
-        dest: /root/.my.cnf
-        mode: 0600
-    - name: Create DB 
-      mysql_db:
-        name: java-app-db
-        state: present
+        enabled: yes
     - name: Create DB user
       mysql_user:
         name: '{{db_user}}'
         password: '{{db_password}}'
-        priv: 'java-app-db.*:ALL'
+        priv: '*.*:ALL'
+        host: '%'
+        state: present
+    - name: Create DB 
+      mysql_db:
+        name: java-app-db
         state: present
     - name: Grab DB server IP
       debug:
