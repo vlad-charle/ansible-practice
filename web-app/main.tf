@@ -72,12 +72,12 @@ resource "aws_route_table_association" "private_routes_to_subnets" {
   route_table_id = aws_route_table.private_route_table.id
 }
 
-data "aws_ami" "amazon_linux" {
+data "aws_ami" "ubuntu" {
   most_recent = true
 
   filter {
     name   = "name"
-    values = ["al2023-ami-2023*"]
+    values = ["ubuntu/images/hvm-ssd/ubuntu-focal-20.04-amd64-server-*"]
   }
 
   filter {
@@ -85,7 +85,7 @@ data "aws_ami" "amazon_linux" {
     values = ["hvm"]
   }
 
-  owners = ["137112412989"] # Amazon
+  owners = ["099720109477"] # Canonical
 }
 
 resource "aws_key_pair" "ec2_ssh_key" {
@@ -130,7 +130,7 @@ resource "aws_security_group" "java_app_sg" {
 
 resource "aws_instance" "java_app_server" {
   count                       = 1
-  ami                         = data.aws_ami.amazon_linux.id
+  ami                         = data.aws_ami.ubuntu.id
   instance_type               = "t2.micro"
   associate_public_ip_address = true
   key_name                    = aws_key_pair.ec2_ssh_key.key_name
@@ -171,7 +171,7 @@ resource "aws_security_group" "ansible_node_sg" {
 
 resource "aws_instance" "ansible_node_server" {
   count                       = 1
-  ami                         = data.aws_ami.amazon_linux.id
+  ami                         = data.aws_ami.ubuntu.id
   instance_type               = "t2.micro"
   associate_public_ip_address = true
   key_name                    = aws_key_pair.ec2_ssh_key.key_name
@@ -237,7 +237,7 @@ resource "aws_security_group" "db_sg" {
 
 resource "aws_instance" "db_server" {
   count                       = 1
-  ami                         = data.aws_ami.amazon_linux.id
+  ami                         = data.aws_ami.ubuntu.id
   instance_type               = "t2.micro"
   associate_public_ip_address = true
   key_name                    = aws_key_pair.ec2_ssh_key.key_name

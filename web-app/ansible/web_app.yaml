@@ -21,18 +21,16 @@
   hosts: tag_Role_db_server
   become: true
   tasks:
-    - name: Install the MySQL repository
-      yum:
-        name: https://dev.mysql.com/get/mysql80-community-release-el7-5.noarch.rpm
-        state: present
-    - name: Install MySQL
-      yum:
-        name: mysql-community-server
-        state: present
+    - name: Update apt cache
+      apt:
         update_cache: yes
+    - name: Install MySQL server
+      apt:
+        name: mysql-server
+        state: present
     - name: Start MySQL service
       service:
-        name: mysqld
+        name: mysql
         state: started
     - name: Create DB 
       mysql_db:
