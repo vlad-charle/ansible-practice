@@ -28,13 +28,12 @@
       mysql_db:
         name: java-app-db
         state: present
-    # - name: Grab DB server IP
-    #   debug:
-    #     msg: "{{ ansible_ssh_host }}"
-    #   register: db_server_ip
-    # - name: Grab DB server IP and store as a fact
-    #   set_fact:
-    #     db_server_ip_fact: "{{ db_server_ip.msg }}"
+    - name: Make sure DB listens on 0.0.0.0
+      lineinfile:
+        path: /etc/mysql/mysql.conf.d/mysqld.cnf
+        regexp: '^bind-address'
+        line: 'bind-address = 0.0.0.0'
+        state: present
     - name: Grab DB server IP and store as a fact
       set_fact:
         db_server_ip: "{{ ansible_ssh_host }}"
@@ -43,7 +42,6 @@
   hosts: tag_Role_web_app_server
   become: true
   vars:
-    # db_server_ip_fact: "{{ hostvars[groups['tag_Role_db_server'][0]]['db_server_ip_fact'] }}"
     db_server_ip: "{{ hostvars[groups['tag_Role_db_server'][0]]['db_server_ip'] }}"
   tasks:
     - name: Build locally
@@ -55,6 +53,11 @@
       copy:
         src: /home/ubuntu/ansible-practice/web-app/build/libs/bootcamp-java-mysql-project-1.0-SNAPSHOT.jar
         dest: /home/ubuntu/java-app.jar
+    - name: make sure Java is installed
+      apt:
+        name: openjdk-17-jre
+        state: present
+        update_cache: yes
     - name: Check if prev app is running
       shell: ps aux | grep "[j]ava -jar" | awk '{print $2}'
       register: running_processes

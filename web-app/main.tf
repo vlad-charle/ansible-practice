@@ -208,7 +208,7 @@ resource "aws_security_group" "db_sg" {
     protocol        = "tcp"
     security_groups = [aws_security_group.java_app_sg.id]
   }
-
+  
   ingress {
     description     = "SSH"
     from_port       = 22
