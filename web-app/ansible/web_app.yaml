@@ -1,22 +1,4 @@
 ---
-# - name: Wait for connection
-#   hosts: all
-#   gather_facts: false
-#   tasks:
-#     - name: Make sure VM is available
-#       wait_for_connection:
-#         delay: 10
-#         timeout: 300
-#     - name: Make sure SSH port is available
-#       wait_for:
-#         port: 22
-#         host: '{{ (ansible_ssh_host|default(ansible_host))|default(inventory_hostname) }}'
-#         delay: 10
-#         timeout: 300
-#       vars:
-#         ansible_connection: local
-#         ansible_python_interpreter: /usr/bin/python3
-
 - name: Install and configure MySQL server
   hosts: tag_Role_db_server
   become: true
@@ -55,22 +37,14 @@
   hosts: tag_Role_web_app_server
   become: true
   tasks:
-    # - name: Create directory
-    #   file:
-    #     path: /home/ubuntu/ansible
-    #     state: present
-    # - name: Checkout java-app repo
-    #   git:
-    #     repo: 'https://github.com/vlad-charle/ansible-practice.git'
-    #     dest: /home/ubuntu/ansible
     - name: Build locally
       local_action: 
         module: command
-        chdir: /home/ubuntu/ansible/ansible-practice/web-app
+        chdir: /home/ubuntu/ansible-practice/web-app
         cmd: ./gradlew build
     - name: Copy to server
       copy:
-        src: /home/ubuntu/ansible/ansible-practice/web-app/build/libs/bootcamp-java-mysql-project-1.0-SNAPSHOT.jar
+        src: /home/ubuntu/ansible-practice/web-app/build/libs/bootcamp-java-mysql-project-1.0-SNAPSHOT.jar
         dest: /home/ubuntu/java-app.jar
     - name: Check if prev app is running
       shell: ps aux | grep "[j]ava -jar" | awk '{print $2}'
