@@ -183,7 +183,7 @@ resource "aws_instance" "ansible_node_server" {
 
 apt update && apt install ansible python3-pip openjdk-17-jre -y
 pip install boto3 botocore
-git clone https://github.com/vlad-charle/ansible-practice.git
+cd /home/ubuntu/ && git clone https://github.com/vlad-charle/ansible-practice.git
 
 #create file for AWS creds
 mkdir .aws && touch /home/ubuntu/.aws/credentials
