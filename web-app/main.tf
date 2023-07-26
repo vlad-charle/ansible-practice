@@ -181,7 +181,8 @@ resource "aws_instance" "ansible_node_server" {
   user_data = <<EOF
 #!/bin/bash
 
-apt update && apt install ansible -y
+apt update && apt install ansible python3-pip -y
+pip install boto3 botocore
 git clone https://github.com/vlad-charle/ansible-practice.git
 
 #create file for AWS creds

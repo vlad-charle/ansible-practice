@@ -55,14 +55,14 @@
   hosts: tag_Role_web_app_server
   become: true
   tasks:
-    - name: Clean-up prev build
-      local_action: 
-        module: command
-        cmd: rm -rf /home/ubuntu/*
-    - name: Checkout java-app repo
-      git:
-        repo: 'https://github.com/vlad-charle/ansible-practice.git'
-        dest: /home/ubuntu/ansible
+    # - name: Create directory
+    #   file:
+    #     path: /home/ubuntu/ansible
+    #     state: present
+    # - name: Checkout java-app repo
+    #   git:
+    #     repo: 'https://github.com/vlad-charle/ansible-practice.git'
+    #     dest: /home/ubuntu/ansible
     - name: Build locally
       local_action: 
         module: command
