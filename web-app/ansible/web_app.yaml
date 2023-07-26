@@ -32,11 +32,13 @@
       debug:
         msg: "{{ ansible_ssh_host }}"
       register: db_server_ip
+    - debug: msg={{ db_server_ip }}
 
 - name: Install java-app
   hosts: tag_Role_web_app_server
   become: true
   tasks:
+    - debug: msg={{ db_server_ip }}
     - name: Build locally
       local_action: 
         module: command
