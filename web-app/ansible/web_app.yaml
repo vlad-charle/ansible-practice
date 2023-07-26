@@ -28,17 +28,24 @@
       mysql_db:
         name: java-app-db
         state: present
-    - name: Grab DB server IP
-      debug:
-        msg: "{{ ansible_ssh_host }}"
-      register: db_server_ip
-    - debug: msg={{ db_server_ip }}
+    # - name: Grab DB server IP
+    #   debug:
+    #     msg: "{{ ansible_ssh_host }}"
+    #   register: db_server_ip
+    # - name: Grab DB server IP and store as a fact
+    #   set_fact:
+    #     db_server_ip_fact: "{{ db_server_ip.msg }}"
+    - name: Grab DB server IP and store as a fact
+      set_fact:
+        db_server_ip: "{{ ansible_ssh_host }}"
 
 - name: Install java-app
   hosts: tag_Role_web_app_server
   become: true
+  vars:
+    # db_server_ip_fact: "{{ hostvars[groups['tag_Role_db_server'][0]]['db_server_ip_fact'] }}"
+    db_server_ip: "{{ hostvars[groups['tag_Role_db_server'][0]]['db_server_ip'] }}"
   tasks:
-    - debug: msg={{ db_server_ip }}
     - name: Build locally
       local_action: 
         module: command

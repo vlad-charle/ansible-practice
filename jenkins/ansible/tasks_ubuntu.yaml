@@ -3,7 +3,7 @@
   apt:
     name: docker.io
     update_cache: yes
-- name: install Java and Docker
+- name: install Java
   apt:
     name: openjdk-17-jre
   when: not run_container
