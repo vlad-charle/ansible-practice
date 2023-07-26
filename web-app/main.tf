@@ -234,7 +234,6 @@ resource "aws_instance" "db_server" {
   count                       = 1
   ami                         = data.aws_ami.ubuntu.id
   instance_type               = "t2.micro"
-  associate_public_ip_address = true
   key_name                    = aws_key_pair.ec2_ssh_key.key_name
   subnet_id                   = aws_subnet.private_subnet.id
   vpc_security_group_ids      = [aws_security_group.db_sg.id]
