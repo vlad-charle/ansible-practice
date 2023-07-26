@@ -181,7 +181,7 @@ resource "aws_instance" "ansible_node_server" {
   user_data = <<EOF
 #!/bin/bash
 
-apt update && apt install ansible
+apt update && apt install ansible -y
 git clone https://github.com/vlad-charle/ansible-practice.git
 
 #create file for AWS creds
