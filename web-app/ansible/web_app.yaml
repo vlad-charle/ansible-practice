@@ -12,6 +12,12 @@
           - libmysqlclient-dev
         state: present
         update_cache: yes
+    - name: Make sure DB listens on 0.0.0.0
+      lineinfile:
+        path: /etc/mysql/mysql.conf.d/mysqld.cnf
+        regexp: '^bind-address'
+        line: 'bind-address = 0.0.0.0'
+        state: present
     - name: Start MySQL service
       service:
         name: mysql
@@ -27,12 +33,6 @@
     - name: Create DB 
       mysql_db:
         name: java-app-db
-        state: present
-    - name: Make sure DB listens on 0.0.0.0
-      lineinfile:
-        path: /etc/mysql/mysql.conf.d/mysqld.cnf
-        regexp: '^bind-address'
-        line: 'bind-address = 0.0.0.0'
         state: present
     - name: Grab DB server IP and store as a fact
       set_fact:
@@ -94,3 +94,8 @@
         cmd: java -jar /home/ubuntu/java-app.jar
       async: 1000
       poll: 0
+    - name: Make sure app is available
+      ansible.builtin.uri:
+        url: 'http://{{ ansible_ssh_host }}:8080'
+      retries: 12 # 12 * 5 seconds = 1 min
+      delay: 5 # Every 5 seconds
