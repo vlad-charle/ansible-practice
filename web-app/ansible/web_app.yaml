@@ -34,6 +34,10 @@
       mysql_db:
         name: java-app-db
         state: present
+    - name: Restart service httpd, in all cases
+      service:
+        name: mysql
+        state: restarted
     - name: Grab DB server IP and store as a fact
       set_fact:
         db_server_ip: "{{ ansible_ssh_host }}"
