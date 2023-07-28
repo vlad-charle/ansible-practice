@@ -18,6 +18,7 @@
         regexp: '^bind-address'
         line: 'bind-address = 0.0.0.0'
         state: present
+      register: bind_address_result
     - name: Start MySQL service
       service:
         name: mysql
@@ -34,7 +35,8 @@
       mysql_db:
         name: java-app-db
         state: present
-    - name: Restart service httpd, in all cases
+    - name: Restart service httpd
+      when: bind_address_result is changed
       service:
         name: mysql
         state: restarted
