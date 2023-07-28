@@ -70,35 +70,36 @@
       command:
         cmd: kill {{running_processes.stdout}}
       when: running_processes.stdout != ""
-    - name: Set DB_USER environment variable for ec2-user
-      lineinfile:
-        path: /home/ubuntu/.bashrc
-        regexp: '^export DB_USER='
-        line: 'export DB_USER={{db_user}}'
-        state: present
-    - name: Set DB_PWD environment variable for ec2-user
-      lineinfile:
-        path: /home/ubuntu/.bashrc
-        regexp: '^export DB_PWD='
-        line: 'export DB_PWD={{db_password}}'
-        state: present
-    - name: Set DB_NAME environment variable for ec2-user
-      lineinfile:
-        path: /home/ubuntu/.bashrc
-        regexp: '^export DB_NAME='
-        line: 'export DB_NAME=java-app-db'
-        state: present
-    - name: Set DB_SERVER environment variable for ec2-user
-      lineinfile:
-        path: /home/ubuntu/.bashrc
-        regexp: '^export DB_SERVER='
-        line: 'export DB_SERVER={{db_server_ip}}'
-        state: present
+    # - name: Set DB_USER environment variable for ec2-user
+    #   lineinfile:
+    #     path: /home/ubuntu/.bashrc
+    #     regexp: '^export DB_USER='
+    #     line: 'export DB_USER={{db_user}}'
+    #     state: present
+    # - name: Set DB_PWD environment variable for ec2-user
+    #   lineinfile:
+    #     path: /home/ubuntu/.bashrc
+    #     regexp: '^export DB_PWD='
+    #     line: 'export DB_PWD={{db_password}}'
+    #     state: present
+    # - name: Set DB_NAME environment variable for ec2-user
+    #   lineinfile:
+    #     path: /home/ubuntu/.bashrc
+    #     regexp: '^export DB_NAME='
+    #     line: 'export DB_NAME=java-app-db'
+    #     state: present
+    # - name: Set DB_SERVER environment variable for ec2-user
+    #   lineinfile:
+    #     path: /home/ubuntu/.bashrc
+    #     regexp: '^export DB_SERVER='
+    #     line: 'export DB_SERVER={{db_server_ip}}'
+    #     state: present
     - name: Run new app
-      become: true
-      become_user: ubuntu
-      command:
-        cmd: java -jar /home/ubuntu/java-app.jar
+      # become: true
+      # become_user: ubuntu
+      # command:
+      #   cmd: java -jar /home/ubuntu/java-app.jar
+      shell: export DB_USER={{db_user}} && export DB_PWD={{db_password}} && export DB_NAME=java-app-db && export DB_SERVER={{db_server_ip}} && java -jar /home/ubuntu/java-app.jar
       # async: 1000
       # poll: 0
     - name: Make sure app is available

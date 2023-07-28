@@ -188,7 +188,7 @@ cd /home/ubuntu/ && git clone https://github.com/vlad-charle/ansible-practice.gi
 
 #create file for AWS creds
 mkdir .aws && touch /home/ubuntu/.aws/credentials
-chown -R ubuntu:ubuntu /home/ubuntu/.aws/credentials
+chown -R ubuntu:ubuntu /home/ubuntu
 EOF
 
   tags = {
