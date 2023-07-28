@@ -44,7 +44,6 @@
 
 - name: Install java-app
   hosts: tag_Role_web_app_server
-  become: true
   vars:
     db_server_ip: "{{ hostvars[groups['tag_Role_db_server'][0]]['db_server_ip'] }}"
   tasks:
@@ -58,6 +57,7 @@
         src: /home/ubuntu/ansible-practice/web-app/build/libs/bootcamp-java-mysql-project-1.0-SNAPSHOT.jar
         dest: /home/ubuntu/java-app.jar
     - name: make sure Java is installed
+      become: true
       apt:
         name: openjdk-17-jre
         state: present
@@ -66,6 +66,7 @@
       shell: ps aux | grep "[j]ava -jar" | awk '{print $2}'
       register: running_processes
     - name: Kill prev run app
+      become: true
       command:
         cmd: kill {{running_processes.stdout}}
       when: running_processes.stdout != ""
@@ -94,10 +95,12 @@
         line: 'export DB_SERVER={{db_server_ip}}'
         state: present
     - name: Run new app
+      become: true
+      become_user: ubuntu
       command:
         cmd: java -jar /home/ubuntu/java-app.jar
-      async: 1000
-      poll: 0
+      # async: 1000
+      # poll: 0
     - name: Make sure app is available
       ansible.builtin.uri:
         url: 'http://{{ ansible_ssh_host }}:8080'
