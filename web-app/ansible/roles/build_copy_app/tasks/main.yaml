@@ -1,0 +1,9 @@
+    - name: Build locally
+      local_action: 
+        module: command
+        chdir: /home/ubuntu/ansible-practice/web-app
+        cmd: ./gradlew build
+    - name: Copy to server
+      copy:
+        src: /home/ubuntu/ansible-practice/web-app/build/libs/bootcamp-java-mysql-project-1.0-SNAPSHOT.jar
+        dest: /home/ubuntu/java-app.jar

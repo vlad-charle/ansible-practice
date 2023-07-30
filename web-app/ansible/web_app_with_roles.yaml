@@ -1,0 +1,22 @@
+---
+- name: Install and configure MySQL server
+  hosts: tag_Role_db_server
+  become: true
+  roles: 
+    - bootstrap_mysql
+
+- name: Install java-app
+  hosts: tag_Role_web_app_server
+  vars:
+    db_server_ip: "{{ hostvars[groups['tag_Role_db_server'][0]]['db_server_ip'] }}"
+  roles: 
+    - build_copy_app
+    - deploy_app
+  post_tasks:
+    - name: Make sure app is available
+      uri:
+        url: 'http://{{ ansible_ssh_host }}:8080'
+      register: _result
+      until: _result.status == 200
+      retries: 12 # 12 * 5 seconds = 1 min
+      delay: 5 # Every 5 seconds

@@ -1,0 +1,40 @@
+    - name: Install MySQL server
+      apt:
+        name: 
+          - mysql-server
+          - mysql-client 
+          - python3-mysqldb
+          - libmysqlclient-dev
+        state: present
+        update_cache: yes
+    - name: Make sure DB listens on 0.0.0.0
+      lineinfile:
+        path: /etc/mysql/mysql.conf.d/mysqld.cnf
+        regexp: '^bind-address'
+        line: 'bind-address = 0.0.0.0'
+        state: present
+      register: bind_address_result
+    - name: Start MySQL service
+      service:
+        name: mysql
+        state: started
+        enabled: yes
+    - name: Create DB user
+      mysql_user:
+        name: '{{db_user}}'
+        password: '{{db_password}}'
+        priv: '*.*:ALL'
+        host: '%'
+        state: present
+    - name: Create DB 
+      mysql_db:
+        name: java-app-db
+        state: present
+    - name: Restart service httpd
+      when: bind_address_result is changed
+      service:
+        name: mysql
+        state: restarted
+    - name: Grab DB server IP and store as a fact
+      set_fact:
+        db_server_ip: "{{ ansible_ssh_host }}"
