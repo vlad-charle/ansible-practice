@@ -1,0 +1,101 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ .Values.appName }}
+  labels:
+    app: {{ .Values.appName }}
+spec:
+  replicas: {{ .Values.replicasCount }}
+  selector:
+    matchLabels:
+      app: {{ .Values.appName }}
+  template:
+    metadata:
+      labels:
+        app: {{ .Values.appName }}
+        profile: fargate
+    spec:
+      imagePullSecrets: 
+      - name: docker-hub
+      containers:
+      - name: {{ .Values.appName }}
+        image: {{ .Values.image }}
+        ports:
+        - containerPort: {{ .Values.containerPort }}
+        env:
+        - name: DB_PWD
+          valueFrom:
+            secretKeyRef:
+              name: mysql-secret
+              key: mysql-password
+        - name: DB_SERVER
+          valueFrom:
+            configMapKeyRef:
+              name: my-app-config
+              key: db_url
+        {{- range .Values.containerEnvs }}
+        - name: {{ .name }}
+          value: {{ .value }}
+        {{- end }}
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: {{ .Values.appName }}
+  annotations:
+    service.beta.kubernetes.io/aws-load-balancer-cross-zone-load-balancing-enabled: "true"
+spec:
+  type: LoadBalancer
+  selector:
+    app: {{ .Values.appName }}
+  ports:
+    - protocol: TCP
+      port: {{ .Values.servicePort }}
+      targetPort: {{ .Values.containerPort }}
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: phpmyadmin
+  labels:
+    app: phpmyadmin
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: phpmyadmin
+  template:
+    metadata:
+      labels:
+        app: phpmyadmin
+    spec:
+      containers:
+      - name: phpmyadmin
+        image: phpmyadmin:5.2
+        ports:
+        - containerPort: 80
+        env:
+        - name: PMA_USER
+          value: {{ .Values.dbUser }}
+        - name: PMA_PASSWORD
+          valueFrom:
+            secretKeyRef:
+              name: mysql-secret
+              key: mysql-password
+        - name: PMA_HOST
+          valueFrom:
+            configMapKeyRef:
+              name: my-app-config
+              key: db_url
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: phpmyadmin
+spec:
+  selector:
+    app.kubernetes.io/name: phpmyadmin
+  ports:
+    - protocol: TCP
+      port: 80
+      targetPort: 80

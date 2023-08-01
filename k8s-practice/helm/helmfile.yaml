@@ -1,0 +1,9 @@
+releases:
+  - name: my-app
+    chart: my-app/my-app
+    values:
+      - my-app/values-my-app.yaml
+  - name: mysql
+    chart: bitnami/mysql
+    values:
+      - mysql/values-mysql-bitnami.yaml

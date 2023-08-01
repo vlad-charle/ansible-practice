@@ -1,0 +1,11 @@
+appName: my-app
+image: vladsanyuk/java-app:${APP_VERSION} 
+replicasCount: 3
+containerPort: 8080
+servicePort: 8080
+containerEnvs:
+  - name: DB_NAME
+    value: app-db
+  - name: DB_USER
+    value: app-user
+dbUser: app-user

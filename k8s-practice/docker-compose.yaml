@@ -1,0 +1,35 @@
+version: "3.9"
+services:
+  mysql-db:
+    image: mysql:8
+    ports: 
+      - 3306:3306
+    environment:
+      - MYSQL_ROOT_PASSWORD=${DB_ROOT_PASSWORD}
+      - MYSQL_DATABASE=${DB_NAME}
+      - MYSQL_USER=${DB_USER}
+      - MYSQL_PASSWORD=${DB_PWD}
+    volumes:
+      - mysql-volume:/var/lib/mysql
+  phpmyadmin:
+    image: phpmyadmin:5.2
+    ports:
+      - 8081:80
+    environment:
+      - PMA_USER=${DB_USER}
+      - PMA_PASSWORD=${DB_PWD}
+    links:
+      - "mysql-db:db"
+  app:
+    image: vladsanyuk/java-app:1675628911-5
+    ports:
+      - 8080:8080
+    environment:
+      - DB_USER=${DB_USER}
+      - DB_PWD=${DB_PWD}
+      - DB_SERVER=mysql-db
+      - DB_NAME=${DB_NAME}
+    depends_on:
+      - mysql-db
+volumes:
+  mysql-volume:

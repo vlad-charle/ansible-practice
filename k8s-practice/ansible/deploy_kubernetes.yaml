@@ -1,0 +1,68 @@
+---
+- name: Create namespace, configmap, secret, Docker creds
+  hosts: localhost
+  tasks:
+    - name: Create a k8s ns
+      k8s:
+        name: my-app
+        api_version: v1
+        kind: Namespace
+        state: present
+    - name: Create secret
+      k8s:
+        state: present
+        definition:
+          apiVersion: v1
+          kind: Secret
+          namespace: my-app
+          metadata:
+            name: mysql-secret
+          type: Opaque
+          data:
+            mysql-root-password: '{{ mysql_root_password|b64encode  }}'
+            mysql-password: '{{ mysql_password|b64encode  }}'
+            mysql-replication-password: '{{ mysql_replication_password|b64encode  }}'
+    - name: Create configmap
+      k8s: 
+        state: present
+        definition:
+          apiVersion: v1
+          kind: ConfigMap
+          namespace: my-app
+          metadata:
+            name: my-app-config
+          data:
+            db_url: mysql-release-primary.my-app.svc.cluster.local
+    - name: Create Docker creds
+      k8s:
+        state: present
+        definition:
+          apiVersion: v1
+          kind: Secret
+          namespace: my-app
+          metadata:
+            name: docker-hub
+          data:
+            .dockerconfigjson: '{{ {"auths": {"https://index.docker.io/v1/": {"username": docker_username, "password": docker_password}}} | to_json | b64encode }}'
+          type: kubernetes.io/dockerconfigjson
+- name: Deploy DB
+  hosts: localhost
+  tasks:
+    - name: Add Bitname chart repo
+      helm_repository:
+        name: bitnami
+        repo_url: "https://charts.bitnami.com/bitnami"
+    - name: Deploy latest version of Prometheus chart inside monitoring namespace (and create it)
+      helm:
+        name: mysql-release
+        chart_ref: bitnami/mysql
+        release_namespace: my-app
+        values_files:
+          - ../helm/mysql/values-mysql-bitnami.yaml
+- name: Deploy app
+  hosts: localhost
+  tasks:
+    - name: Deploy app
+      k8s:
+        state: present
+        src: ../k8s/my-app.yaml

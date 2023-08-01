@@ -1,0 +1,97 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: my-app
+  labels:
+    app: my-app
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: my-app
+  template:
+    metadata:
+      labels:
+        app: my-app
+    spec:
+      imagePullSecrets: 
+      - name: docker-hub
+      containers:
+      - name: my-app
+        image: vladsanyuk/java-app:1.0
+        ports:
+        - containerPort: 8080
+        env:
+        - name: DB_USER
+          value: app-user
+        - name: DB_PWD
+          valueFrom:
+            secretKeyRef:
+              name: mysql-secret
+              key: mysql-password
+        - name: DB_SERVER
+          valueFrom:
+            configMapKeyRef:
+              name: my-app-config
+              key: db_url
+        - name: DB_NAME
+          value: app-db
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: my-app
+spec:
+  selector:
+    app.kubernetes.io/name: my-app
+  ports:
+    - protocol: TCP
+      port: 8080
+      targetPort: 8080
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: phpmyadmin
+  labels:
+    app: phpmyadmin
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: phpmyadmin
+  template:
+    metadata:
+      labels:
+        app: phpmyadmin
+    spec:
+      containers:
+      - name: phpmyadmin
+        image: phpmyadmin:5.2
+        ports:
+        - containerPort: 80
+        env:
+        - name: PMA_USER
+          value: app-user
+        - name: PMA_PASSWORD
+          valueFrom:
+            secretKeyRef:
+              name: mysql-secret
+              key: mysql-password
+        - name: PMA_HOST
+          valueFrom:
+            configMapKeyRef:
+              name: my-app-config
+              key: db_url
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: phpmyadmin
+spec:
+  selector:
+    app.kubernetes.io/name: phpmyadmin
+  ports:
+    - protocol: TCP
+      port: 80
+      targetPort: 80

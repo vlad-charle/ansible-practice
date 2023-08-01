@@ -1,0 +1,6 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: my-app-config
+data:
+  db_url: mysql-release-primary.my-app.svc.cluster.local

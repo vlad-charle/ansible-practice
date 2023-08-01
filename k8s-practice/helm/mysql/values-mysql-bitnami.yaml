@@ -1,0 +1,43 @@
+auth:
+  existingSecret: mysql-secret
+  username: app-user
+  database: app-db
+
+architecture: replication
+
+primary:
+  startupProbe:
+    enabled: false
+  readinessProbe:
+    enabled: false
+  livenessProbe:
+    enabled: false
+  persistence:
+    size: 2Gi
+    enabled: false
+  resources:
+    limits:
+      memory: 512Mi
+      cpu: 250m
+    requests:
+      memory: 256Mi
+      cpu: 100m
+
+secondary:
+  startupProbe:
+    enabled: false
+  readinessProbe:
+    enabled: false
+  livenessProbe:
+    enabled: false
+  persistence:
+    size: 2Gi
+    enabled: false
+  replicaCount: 1
+  resources:
+    limits:
+      memory: 512Mi
+      cpu: 250m
+    requests:
+      memory: 256Mi
+      cpu: 100m
