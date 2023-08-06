@@ -129,9 +129,9 @@ pipeline {
                         echo 'Deploying app'
                         withCredentials([usernamePassword(credentialsId: 'docker-hub', passwordVariable: 'PASS', usernameVariable: 'USER')]) {
                             sh """
-                            // set +x
+                            # set +x
                             ansible-playbook ansible/deploy_kubernetes.yaml -e 'mysql_root_password=${MYSQL_ROOT_PASSWORD} mysql_password=${MYSQL_PASSWORD} mysql_replication_password=${MYSQL_REPLICATION_PASSWORD} docker_username=${PASS} docker_password=${USER} image_tag=${APP_VERSION}'
-                            // set -x
+                            # set -x
                             """
                         }
                     }
