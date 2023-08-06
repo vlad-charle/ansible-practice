@@ -28,7 +28,7 @@ pipeline {
         MYSQL_REPLICATION_PASSWORD = sh(script: 'aws ssm get-parameter --name mysql_replication_password --region ${params.REGION} --with-decryption --no-cli-pager | jq --raw-output \'.Parameter.Value\'',returnStdout: true).trim()
     }
 
-    // stages {
+    stages {
     //     stage('Build app') {
     //         when {
     //             expression {
