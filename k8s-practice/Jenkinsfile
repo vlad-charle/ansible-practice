@@ -19,9 +19,11 @@ pipeline {
         APP_VERSION = "${TIMESTAMP}-${BUILD_ID}"
         AWS_ACCESS_KEY_ID = credentials('aws_access_key_id')
         AWS_SECRET_ACCESS_KEY = credentials('aws_secret_access_key')
-        MYSQL_ROOT_PASSWORD = sh(script: 'aws ssm get-parameter --name mysql_root_password --region ${params.REGION} --with-decryption --no-cli-pager | jq --raw-output ".Parameter.Value"',returnStdout: true).trim()
-        MYSQL_PASSWORD = sh(script: 'aws ssm get-parameter --name mysql_password --region ${params.REGION} --with-decryption --no-cli-pager | jq --raw-output ".Parameter.Value"',returnStdout: true).trim()
-        MYSQL_REPLICATION_PASSWORD = sh(script: 'aws ssm get-parameter --name mysql_replication_password --region ${params.REGION} --with-decryption --no-cli-pager | jq --raw-output ".Parameter.Value"',returnStdout: true).trim()
+        // with sh single quotes, params.SOME_VAR are accessible via ${SOME_VAR}, instead of ${params.SOME_VAR}, some goes for env.SOME_VAR
+        // it's considered a best practice to use sinle quotes not to expose you env vars values into the pipeline
+        MYSQL_ROOT_PASSWORD = sh(script: 'aws ssm get-parameter --name mysql_root_password --region ${REGION} --with-decryption --no-cli-pager | jq --raw-output ".Parameter.Value"',returnStdout: true).trim()
+        MYSQL_PASSWORD = sh(script: 'aws ssm get-parameter --name mysql_password --region ${REGION} --with-decryption --no-cli-pager | jq --raw-output ".Parameter.Value"',returnStdout: true).trim()
+        MYSQL_REPLICATION_PASSWORD = sh(script: 'aws ssm get-parameter --name mysql_replication_password --region ${REGION} --with-decryption --no-cli-pager | jq --raw-output ".Parameter.Value"',returnStdout: true).trim()
     }
 
     stages {
@@ -112,7 +114,7 @@ pipeline {
             steps {
                 script {
                     echo 'Getting kubeconfig'
-                    sh "aws eks update-kubeconfig --region us-east-1 --name ${params.ENV}-eks-cluster"
+                    sh 'aws eks update-kubeconfig --region us-east-1 --name ${ENV}-eks-cluster'
                 }
             }
         }
