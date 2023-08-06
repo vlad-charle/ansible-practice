@@ -3,14 +3,14 @@
   hosts: localhost
   tasks:
     - name: Create a k8s ns
-      k8s:
+      kubernetes.core.k8s:
         name: my-app
         api_version: v1
         kind: Namespace
         state: present
         kubeconfig: '{{ kubeconfig }}'
     - name: Create secret
-      k8s:
+      kubernetes.core.k8s:
         state: present
         kubeconfig: '{{ kubeconfig }}'
         definition:
@@ -25,7 +25,7 @@
             mysql-password: '{{ mysql_password|b64encode  }}'
             mysql-replication-password: '{{ mysql_replication_password|b64encode  }}'
     - name: Create configmap
-      k8s: 
+      kubernetes.core.k8s: 
         state: present
         kubeconfig: '{{ kubeconfig }}'
         definition:
@@ -37,7 +37,7 @@
           data:
             db_url: mysql-release-primary.my-app.svc.cluster.local
     - name: Create Docker creds
-      k8s:
+      kubernetes.core.k8s:
         state: present
         kubeconfig: '{{ kubeconfig }}'
         definition:
@@ -69,7 +69,7 @@
   hosts: localhost
   tasks:
     - name: Deploy app
-      k8s:
+      kubernetes.core.k8s:
         state: present
         kubeconfig: '{{ kubeconfig }}'
         definition:
@@ -113,7 +113,7 @@
                   - name: DB_NAME
                     value: app-db
     - name: Deploy app service and other components
-      k8s:
+      kubernetes.core.k8s:
         state: present
         kubeconfig: '{{ kubeconfig }}'
         src: ../k8s/my-app.yaml
