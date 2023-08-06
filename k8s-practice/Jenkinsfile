@@ -28,88 +28,88 @@ pipeline {
         MYSQL_REPLICATION_PASSWORD = sh(script: 'aws ssm get-parameter --name mysql_replication_password --region ${params.REGION} --with-decryption --no-cli-pager | jq --raw-output \'.Parameter.Value\'',returnStdout: true).trim()
     }
 
-    stages {
-        stage('Build app') {
-            when {
-                expression {
-                    BRANCH_NAME == 'master'
-                }
-            }
-            steps {
-                    dir('k8s-practice') {
-                        echo 'Building app'
-                        sh './gradlew build'
-                    }
+    // stages {
+    //     stage('Build app') {
+    //         when {
+    //             expression {
+    //                 BRANCH_NAME == 'master'
+    //             }
+    //         }
+    //         steps {
+    //                 dir('k8s-practice') {
+    //                     echo 'Building app'
+    //                     sh './gradlew build'
+    //                 }
                     
-            }
-        }
+    //         }
+    //     }
 
-        stage('Test app') {
-            steps {
-                dir('k8s-practice') {
-                    echo 'Running tests'
-                    sh './gradlew test'
-                }
-            }
+    //     stage('Test app') {
+    //         steps {
+    //             dir('k8s-practice') {
+    //                 echo 'Running tests'
+    //                 sh './gradlew test'
+    //             }
+    //         }
 
-            post {
-                failure {
-                    sh 'exit 1'
-                }
-            }
-        }
+    //         post {
+    //             failure {
+    //                 sh 'exit 1'
+    //             }
+    //         }
+    //     }
 
-        stage('Login to registry') {
-            when {
-                expression {
-                    BRANCH_NAME == 'master'
-                }
-            }
-            steps {
-                script {
-                    echo 'Logging into Docker Hub'
-                    withCredentials([usernamePassword(credentialsId: 'docker-hub', passwordVariable: 'PASS', usernameVariable: 'USER')]) {
-                        // sh "echo $PASS | docker login -u $USER --password-stdin"
-                        sh 'echo $PASS | docker login -u $USER --password-stdin'
-                    }
-                }
-            }
-        }
+    //     stage('Login to registry') {
+    //         when {
+    //             expression {
+    //                 BRANCH_NAME == 'master'
+    //             }
+    //         }
+    //         steps {
+    //             script {
+    //                 echo 'Logging into Docker Hub'
+    //                 withCredentials([usernamePassword(credentialsId: 'docker-hub', passwordVariable: 'PASS', usernameVariable: 'USER')]) {
+    //                     // sh "echo $PASS | docker login -u $USER --password-stdin"
+    //                     sh 'echo $PASS | docker login -u $USER --password-stdin'
+    //                 }
+    //             }
+    //         }
+    //     }
 
-        stage('Build image') {
-            when {
-                expression {
-                    BRANCH_NAME == 'master'
-                }
-            }
-            steps {
-                script {
-                    dir('k8s-practice') {
-                        echo 'Building container image'
-                        // sh "docker build -t vladsanyuk/java-app:${APP_VERSION} ."
-                        sh 'docker build -t vladsanyuk/java-app:${APP_VERSION} .'
-                    }
-                }
-            }
-        }
+    //     stage('Build image') {
+    //         when {
+    //             expression {
+    //                 BRANCH_NAME == 'master'
+    //             }
+    //         }
+    //         steps {
+    //             script {
+    //                 dir('k8s-practice') {
+    //                     echo 'Building container image'
+    //                     // sh "docker build -t vladsanyuk/java-app:${APP_VERSION} ."
+    //                     sh 'docker build -t vladsanyuk/java-app:${APP_VERSION} .'
+    //                 }
+    //             }
+    //         }
+    //     }
 
-        stage('Push to registry') {
-            when {
-                expression {
-                    BRANCH_NAME == 'master'
-                }
-            }
-            steps {
-                script {
-                    echo 'Pushing image to registry'
-                    // sh "docker push vladsanyuk/java-app:${APP_VERSION}"
-                    sh 'docker push vladsanyuk/java-app:${APP_VERSION}'
-                    echo 'Clean-up image'
-                    // sh "docker rmi vladsanyuk/java-app:${APP_VERSION}"
-                    sh 'docker rmi vladsanyuk/java-app:${APP_VERSION}'
-                }
-            }
-        }
+    //     stage('Push to registry') {
+    //         when {
+    //             expression {
+    //                 BRANCH_NAME == 'master'
+    //             }
+    //         }
+    //         steps {
+    //             script {
+    //                 echo 'Pushing image to registry'
+    //                 // sh "docker push vladsanyuk/java-app:${APP_VERSION}"
+    //                 sh 'docker push vladsanyuk/java-app:${APP_VERSION}'
+    //                 echo 'Clean-up image'
+    //                 // sh "docker rmi vladsanyuk/java-app:${APP_VERSION}"
+    //                 sh 'docker rmi vladsanyuk/java-app:${APP_VERSION}'
+    //             }
+    //         }
+    //     }
 
         stage('Get kubeconfig') {
             when {
@@ -144,13 +144,13 @@ pipeline {
                             // docker_password=${USER}\
                             // image_tag=${APP_VERSION}'"
 
-                            sh 'ansible-playbook ansible/deploy_kubernetes.yaml -e "\
+                            sh 'ansible-playbook ansible/deploy_kubernetes.yaml -e \"\
                             mysql_root_password=${MYSQL_ROOT_PASSWORD}\
                             mysql_password=${MYSQL_PASSWORD}\
                             mysql_replication_password=${MYSQL_REPLICATION_PASSWORD}\
                             docker_username=$PASS\
                             docker_password=$USER\
-                            image_tag=${APP_VERSION}"'
+                            image_tag=${APP_VERSION}\"'
                         }
                     }
                 }
