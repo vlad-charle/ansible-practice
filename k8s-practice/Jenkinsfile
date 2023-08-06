@@ -134,7 +134,7 @@ pipeline {
                             // # set -x
                             // """
 
-                            sh 'ansible-playbook ansible/deploy_kubernetes.yaml -e \'mysql_root_password=${MYSQL_ROOT_PASSWORD} mysql_password=${MYSQL_PASSWORD} mysql_replication_password=${MYSQL_REPLICATION_PASSWORD} docker_username=${PASS} docker_password=${USER} image_tag=${APP_VERSION}\''
+                            sh 'ansible-playbook ansible/deploy_kubernetes.yaml -e \'mysql_root_password=$MYSQL_ROOT_PASSWORD mysql_password=${MYSQL_PASSWORD} mysql_replication_password=${MYSQL_REPLICATION_PASSWORD} docker_username=$PASS docker_password=$USER image_tag=${APP_VERSION}\''
                         }
                     }
                 }
