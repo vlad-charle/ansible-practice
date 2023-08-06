@@ -65,4 +65,46 @@
     - name: Deploy app
       k8s:
         state: present
+        definition:
+          apiVersion: apps/v1
+          kind: Deployment
+          metadata:
+            name: my-app
+            labels:
+              app: my-app
+          spec:
+            replicas: 1
+            selector:
+              matchLabels:
+                app: my-app
+            template:
+              metadata:
+                labels:
+                  app: my-app
+              spec:
+                imagePullSecrets: 
+                - name: docker-hub
+                containers:
+                - name: my-app
+                  image: 'vladsanyuk/java-app:{{ image_tag }}'
+                  ports:
+                  - containerPort: 8080
+                  env:
+                  - name: DB_USER
+                    value: app-user
+                  - name: DB_PWD
+                    valueFrom:
+                      secretKeyRef:
+                        name: mysql-secret
+                        key: mysql-password
+                  - name: DB_SERVER
+                    valueFrom:
+                      configMapKeyRef:
+                        name: my-app-config
+                        key: db_url
+                  - name: DB_NAME
+                    value: app-db
+    - name: Deploy app service and other components
+      k8s:
+        state: present
         src: ../k8s/my-app.yaml
