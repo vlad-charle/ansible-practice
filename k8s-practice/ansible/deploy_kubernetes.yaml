@@ -8,11 +8,11 @@
         api_version: v1
         kind: Namespace
         state: present
-        kubeconfig: {{ kubeconfig }}
+        kubeconfig: '{{ kubeconfig }}'
     - name: Create secret
       k8s:
         state: present
-        kubeconfig: {{ kubeconfig }}
+        kubeconfig: '{{ kubeconfig }}'
         definition:
           apiVersion: v1
           kind: Secret
@@ -27,7 +27,7 @@
     - name: Create configmap
       k8s: 
         state: present
-        kubeconfig: {{ kubeconfig }}
+        kubeconfig: '{{ kubeconfig }}'
         definition:
           apiVersion: v1
           kind: ConfigMap
@@ -39,7 +39,7 @@
     - name: Create Docker creds
       k8s:
         state: present
-        kubeconfig: {{ kubeconfig }}
+        kubeconfig: '{{ kubeconfig }}'
         definition:
           apiVersion: v1
           kind: Secret
@@ -55,12 +55,12 @@
     - name: Add Bitname chart repo
       kubernetes.core.helm_repository:
         name: bitnami
-        kubeconfig: {{ kubeconfig }}
+        kubeconfig: '{{ kubeconfig }}'
         repo_url: "https://charts.bitnami.com/bitnami"
     - name: Deploy latest version of MySQL chart inside my-app namespace
       kubernetes.core.helm:
         name: mysql-release
-        kubeconfig: {{ kubeconfig }}
+        kubeconfig: '{{ kubeconfig }}'
         chart_ref: bitnami/mysql
         release_namespace: my-app
         values_files:
@@ -71,7 +71,7 @@
     - name: Deploy app
       k8s:
         state: present
-        kubeconfig: {{ kubeconfig }}
+        kubeconfig: '{{ kubeconfig }}'
         definition:
           apiVersion: apps/v1
           kind: Deployment
@@ -115,5 +115,5 @@
     - name: Deploy app service and other components
       k8s:
         state: present
-        kubeconfig: {{ kubeconfig }}
+        kubeconfig: '{{ kubeconfig }}'
         src: ../k8s/my-app.yaml
