@@ -19,9 +19,9 @@ pipeline {
         APP_VERSION = "${TIMESTAMP}-${BUILD_ID}"
         AWS_ACCESS_KEY_ID = credentials('aws_access_key_id')
         AWS_SECRET_ACCESS_KEY = credentials('aws_secret_access_key')
-        MYSQL_ROOT_PASSWORD = sh(script: "aws ssm get-parameter --name mysql_root_password --region ${params.REGION} --with-decryption --no-cli-pager | jq --raw-output '.Parameter.Value'",returnStdout: true).trim()
-        MYSQL_PASSWORD = sh(script: "aws ssm get-parameter --name mysql_password --region ${params.REGION} --with-decryption --no-cli-pager | jq --raw-output '.Parameter.Value'",returnStdout: true).trim()
-        MYSQL_REPLICATION_PASSWORD = sh(script: "aws ssm get-parameter --name mysql_replication_password --region ${params.REGION} --with-decryption --no-cli-pager | jq --raw-output '.Parameter.Value'",returnStdout: true).trim()
+        MYSQL_ROOT_PASSWORD = sh(script: 'aws ssm get-parameter --name mysql_root_password --region ${params.REGION} --with-decryption --no-cli-pager | jq --raw-output ".Parameter.Value"',returnStdout: true).trim()
+        MYSQL_PASSWORD = sh(script: 'aws ssm get-parameter --name mysql_password --region ${params.REGION} --with-decryption --no-cli-pager | jq --raw-output ".Parameter.Value"',returnStdout: true).trim()
+        MYSQL_REPLICATION_PASSWORD = sh(script: 'aws ssm get-parameter --name mysql_replication_password --region ${params.REGION} --with-decryption --no-cli-pager | jq --raw-output ".Parameter.Value"',returnStdout: true).trim()
     }
 
     stages {
@@ -128,11 +128,11 @@ pipeline {
                     dir('k8s-practice') {
                         echo 'Deploying app'
                         withCredentials([usernamePassword(credentialsId: 'docker-hub', passwordVariable: 'PASS', usernameVariable: 'USER')]) {
-                            sh """
+                            sh '''
                             set +x
-                            ansible-playbook ansible/deploy_kubernetes.yaml -e 'mysql_root_password=${MYSQL_ROOT_PASSWORD} mysql_password=${MYSQL_PASSWORD} mysql_replication_password=${MYSQL_REPLICATION_PASSWORD} docker_username=${PASS} docker_password=${USER} image_tag=${APP_VERSION}'
+                            ansible-playbook ansible/deploy_kubernetes.yaml -e "mysql_root_password=${MYSQL_ROOT_PASSWORD} mysql_password=${MYSQL_PASSWORD} mysql_replication_password=${MYSQL_REPLICATION_PASSWORD} docker_username=${PASS} docker_password=${USER} image_tag=${APP_VERSION}"
                             set -x
-                            """
+                            '''
                         }
                     }
                 }
